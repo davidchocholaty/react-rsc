@@ -1,0 +1,10 @@
+{
+	"files": [],
+	"references": [
+		{ "path": "./packages/core" },
+		{ "path": "./packages/sst-extensions" },
+		{ "path": "./packages/trpc-api" },
+		{ "path": "./domains/transaction" },
+		{ "path": "./web" }
+	]
+}

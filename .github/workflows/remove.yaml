@@ -1,0 +1,23 @@
+name: Remove Deployment
+on:
+  workflow_dispatch:
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+jobs:
+  remove:
+    # We don't want to remove protected deployment
+    if: github.ref_protected == false
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: "./.github/actions/setup_node_and_pnpm"
+
+      - name: Assume AWS role
+        uses: "./.github/actions/configure_aws_credentials"
+
+      - name: Remove
+        run: mise sst:remove

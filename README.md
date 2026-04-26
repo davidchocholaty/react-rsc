@@ -1,0 +1,39 @@
+# Purple Stack v4
+
+A serverless stack application template built in SST v3. [Learn more](https://sst.dev/docs/set-up-a-monorepo).
+
+## Get started
+
+1. Use this template to [create your own repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+
+2. Clone the new repo.
+
+   ```bash
+   git clone <REPO_URL> MY_APP
+   cd MY_APP
+   ```
+
+3. Rename the files in the project to the name of your app.
+
+   ```bash
+   npx replace-in-file '/purple-stack/g' 'MY_APP' '**/*.*' --verbose
+   ```
+
+4. Copy mise.local.toml.example to mise.local.toml and update the values. Mainly the name of local aws profile in AWS_PROFILE which should be used for the deployment of the app.
+
+5. [Install](https://mise.jdx.dev/getting-started.html) mise for managing global tools, tasks and environment variables.
+6. Install the global tools using Mise (Node, PNPM, ...) - run
+    ```bash
+    mise install
+    ```
+    also run if asked for
+    ```bash
+    mise trust
+    ```
+6. Deploy!
+
+   ```bash
+   pnpm install
+   pnpm run sst:deploy
+   ```
+7. Change the role in Github Actions .github/actions/configure_aws_credentials to your desired deployment role.
