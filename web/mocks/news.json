@@ -1,0 +1,62 @@
+[
+	{
+		"id": "n1",
+		"timestamp": "08:32",
+		"headline": "Asia session opens mixed; tech leads on AI capex revisions",
+		"body": "Regional indices opened cautiously after weekend macro prints; semis outperformed on a 2026 capex upgrade from a major hyperscaler."
+	},
+	{
+		"id": "n2",
+		"timestamp": "08:47",
+		"headline": "ECB minutes signal patience on cuts despite softening core CPI",
+		"body": "Doves remain a minority. Markets pared back rate-cut bets at the front end; bunds steepened modestly."
+	},
+	{
+		"id": "n3",
+		"timestamp": "09:03",
+		"headline": "Brent edges higher into European open on tighter physical signals",
+		"body": "Spreads firmed, refinery margins rebounded; little response from energy equities so far."
+	},
+	{
+		"id": "n4",
+		"timestamp": "09:14",
+		"headline": "Crypto majors range-bound ahead of US CPI",
+		"body": "Funding remains positive but small; perp basis compressed across exchanges overnight."
+	},
+	{
+		"id": "n5",
+		"timestamp": "09:31",
+		"headline": "Banks lead European open as curve steepens",
+		"body": "Senior unsecured spreads tightened 2–3bp; earnings season expectations have crept higher into next week."
+	},
+	{
+		"id": "n6",
+		"timestamp": "09:55",
+		"headline": "EUR/USD stalls at the 1.10 zone; flow desk reports option-related demand",
+		"body": "Topside vol bid into NFP; risk reversals less skewed than a month ago."
+	},
+	{
+		"id": "n7",
+		"timestamp": "10:12",
+		"headline": "Industrials downgraded at a major sell-side house",
+		"body": "Cited freight rate normalization and softer order books in EMEA; underweight for the next two quarters."
+	},
+	{
+		"id": "n8",
+		"timestamp": "10:29",
+		"headline": "Gold consolidates after weekend record; physical premiums steady",
+		"body": "ETF flows turned modestly positive; central-bank demand remains the dominant narrative."
+	},
+	{
+		"id": "n9",
+		"timestamp": "10:47",
+		"headline": "US futures grind higher as yields ease pre-data",
+		"body": "Small-caps lagging; breadth narrowed late in the European morning."
+	},
+	{
+		"id": "n10",
+		"timestamp": "11:03",
+		"headline": "Watchlist: a chip-equipment name reports after the close",
+		"body": "Buy-side expectations: in-line revenue, gross margin focus, color on 2027 capex visibility."
+	}
+]
