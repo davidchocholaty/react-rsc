@@ -1,6 +1,9 @@
 import { Suspense } from 'react'
 import { NewsPanel, NewsPanelSkeleton } from '@/app/_components/NewsPanel'
-import { OrderBook } from '@/app/_components/OrderBook'
+import {
+	OrderBookRsc,
+	OrderBookRscFallback
+} from '@/app/_components/OrderBookRsc'
 import { OrderTicket } from '@/app/_components/OrderTicket'
 import { PriceChart } from '@/app/_components/PriceChart'
 import {
@@ -8,16 +11,25 @@ import {
 	RecentTradesSkeleton
 } from '@/app/_components/RecentTrades'
 
-// Step-2: page is a server component. Static shell paints immediately; slow
-// async panels (news, recent-trades) suspend independently and stream in.
-// Chart, order book, and order ticket remain 'use client' — they're truly
-// interactive leaves and don't suspend at the server.
+// SSG can't complete when an async RSC never resolves — that's the *demo* in
+// dev/runtime, but it would lock `next build` indefinitely and make the tag
+// hard to reproduce. Force dynamic rendering so build skips static gen and
+// the failure shows up only when a request hits it (which is the intent).
+export const dynamic = 'force-dynamic'
+
+// step-5a — failed attempt. The order book is rendered as an async RSC that
+// awaits a "first WebSocket message". The Suspense boundary hangs on stage,
+// teaching that RSC streams a single response per request and is structurally
+// unsuited to long-lived push channels. The fix lands at step-5-honest-limits
+// where OrderBook returns to its client-island form.
 export default function DashboardPage() {
 	return (
 		<main className="grid min-h-screen grid-cols-1 gap-3 p-4 lg:grid-cols-2">
 			<DashboardHeader />
 			<PriceChart />
-			<OrderBook />
+			<Suspense fallback={<OrderBookRscFallback />}>
+				<OrderBookRsc />
+			</Suspense>
 			<OrderTicket />
 			<Suspense fallback={<NewsPanelSkeleton />}>
 				<NewsPanel />
@@ -39,11 +51,11 @@ function DashboardHeader() {
 					RSC Trading Dashboard
 				</h1>
 				<p className="text-[11px] text-zinc-500">
-					symbol: BRNO/EUR · session demo · step-4-rsc-boundary
+					symbol: BRNO/EUR · session demo · step-5a-rsc-ws-fail
 				</p>
 			</div>
-			<span className="rounded border border-zinc-800 bg-zinc-950 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-violet-400">
-				RSC boundary
+			<span className="rounded border border-zinc-800 bg-zinc-950 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-rose-400">
+				ws-as-rsc fail
 			</span>
 		</header>
 	)
