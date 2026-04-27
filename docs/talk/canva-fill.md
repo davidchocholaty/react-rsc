@@ -4,13 +4,13 @@ Paste-ready content for the Canva deck `react_brno` (https://www.canva.com/desig
 
 **How to use:** open the deck. For each slide below, copy the **Title** and **Body** text into the matching text frames; paste **Code** into a mono-font block; drop the **Visual** in. Paste **Presenter notes** into Canva's presenter-notes panel (View → Notes).
 
-**Plan:** 16 slides aligned to the user's sketched outline. Footer convention: `PURPLE TECHNOLOGY · NN · React Brno #1`.
+**Plan:** 17 slides aligned to the user's sketched outline plus a dedicated WebSocket-as-RSC failure beat. Footer convention: `PURPLE TECHNOLOGY · NN · React Brno #1`.
 
 **Theme:** dark (zinc-950 / zinc-900). Mono font for code, sans for prose. Accent colors: **cyan** = client island, **violet** = RSC, **emerald** = optimistic / improvement, **rose** = sharp edge / regression.
 
 **Talk length:** ~17 min content + ~3 min Q&A in a 20-min slot.
 
-**Arc:** problem (users want speed; AI doesn't replace architectural judgment) → demo intro → 5-step roadmap → metrics → fast walkthrough of steps 1–3 with values → RSC concept introduction → CSR/SSR/RSC comparison → step 4 RSC with values → summary of all measurements → practical pros/cons + decision tree → AI as iteration accelerator → resources → Q&A.
+**Arc:** problem (users want speed; AI doesn't replace architectural judgment) → demo intro → 5-step roadmap → metrics → fast walkthrough of steps 1–3 with values → RSC concept introduction → CSR/SSR/RSC comparison → step 4 RSC with values → summary of all measurements → **WebSocket-as-RSC failure (the strongest "don't do this" beat)** → practical pros/cons + decision tree → AI as iteration accelerator → resources → Q&A.
 
 ---
 
@@ -381,13 +381,57 @@ export function TradesLiveTail({ initialTrades }) {
 **Visual:** stacked horizontal bar chart per metric, one bar per step. Color rows: emerald = improvement, rose = regression. Or just the table on a clean dark background.
 
 **Presenter notes:**
-> This is the slide to photograph. Two columns of evidence: this codebase's own captured numbers and Makarevich's published cross-check. The lessons in the bottom block are the honest reading — wins, caveats, and the one place RSC actually loses (warm reload without server caching).
+> The slide audience photographs. Two columns of evidence: this codebase's own captured numbers and Makarevich's published cross-check. Honest takeaways in the bottom block. Next slide is the load-bearing "do not do this" beat — keep momentum.
 
 ---
 
-## Slide 13 — RSC · practical takeaway
+## Slide 13 — When RSC fails · the WebSocket category error
 
 **Footer:** `PURPLE TECHNOLOGY · 13 · React Brno #1`
+
+**Title:**
+> When RSC fails — the WebSocket category error
+
+**Subtitle:**
+> One protocol mismatch you must not make
+
+**Body:**
+> RSC streams **one response per request**.
+> A WebSocket is **bidirectional and long-lived**.
+> Modeling the second with the first hangs Suspense **forever**.
+
+**Code:**
+```tsx
+// step-5a-rsc-ws-fail / web/app/_components/OrderBookRsc.tsx
+async function awaitFirstWebSocketMessage(): Promise<BookSnapshot> {
+  return new Promise<BookSnapshot>(() => {
+    // Intentionally never resolves — Suspense holds the fallback.
+  })
+}
+
+export async function OrderBookRsc() {
+  const book = await awaitFirstWebSocketMessage() // page hangs here
+  return /* … */
+}
+```
+
+**Visual:** screenshot of the order-book panel showing "awaiting first ws message…" Suspense fallback. Rest of dashboard normal. Rose accent border on the failing panel.
+
+**Demo cue:**
+1. `git switch -C live-5a step-5a-rsc-ws-fail`
+2. `pnpm install --frozen-lockfile`
+3. `pnpm --filter @purple-stack/web dev`
+4. Reload — order book hangs forever; the rest of the dashboard still works
+5. Switch back: `git switch -` then `pnpm demo:5`
+
+**Presenter notes:**
+> The strongest "do not do this" beat in the talk. RSC is single-response by design; WebSockets are inherently push-shaped. Modeling the second with the first is a category error, not a bug. The fix is what we already shipped in step 4 — keep the order book as a client island that subscribes via `useEffect`, with RSC providing the initial snapshot. If the live demo doesn't hang on stage for any reason, the slide does the work — the never-resolving Promise is unmistakable.
+
+---
+
+## Slide 14 — RSC · practical takeaway
+
+**Footer:** `PURPLE TECHNOLOGY · 14 · React Brno #1`
 
 **Title:**
 > RSC — what to take home
@@ -412,13 +456,13 @@ export function TradesLiveTail({ initialTrades }) {
 **Visual:** three-row card. Top row: emerald pros vs rose cons two-column. Middle row: four "when to reach for" cards horizontal. Bottom row: simple decision flow + 3-zone mental-model diagram.
 
 **Presenter notes:**
-> One slide that combines pros/cons, situational guidance, decision tree, and mental model. Photo-worthy. The key insight: most architectural arguments resolve to "is this push-shaped or pull-shaped?" — pull → server, push → client. RSC isn't a hammer; it's one tool in a kit that now also includes Server Actions, Suspense, optimistic UI, and client islands. Today we have more options than ever.
+> One slide that combines pros/cons, situational guidance, decision tree, and mental model. Photo-worthy. The key insight: most architectural arguments resolve to "is this push-shaped or pull-shaped?" — pull → server, push → client. After the WebSocket-as-RSC failure on the previous slide, this take-home is the codified guidance.
 
 ---
 
-## Slide 14 — With AI we can optimize much faster
+## Slide 15 — With AI we can optimize much faster
 
-**Footer:** `PURPLE TECHNOLOGY · 14 · React Brno #1`
+**Footer:** `PURPLE TECHNOLOGY · 15 · React Brno #1`
 
 **Title:**
 > Don't be afraid to try — AI shrinks the cost
@@ -445,9 +489,9 @@ export function TradesLiveTail({ initialTrades }) {
 
 ---
 
-## Slide 15 — Resources
+## Slide 16 — Resources
 
-**Footer:** `PURPLE TECHNOLOGY · 15 · React Brno #1`
+**Footer:** `PURPLE TECHNOLOGY · 16 · React Brno #1`
 
 **Title:**
 > Resources · sources · further reading
@@ -479,9 +523,9 @@ pnpm demo:1:prod # production build for measurements
 
 ---
 
-## Slide 16 — Q&A
+## Slide 17 — Q&A
 
-**Footer:** `PURPLE TECHNOLOGY · 16 · React Brno #1`
+**Footer:** `PURPLE TECHNOLOGY · 17 · React Brno #1`
 
 **Title:**
 > Questions.
@@ -498,14 +542,13 @@ pnpm demo:1:prod # production build for measurements
 
 **Presenter notes (anticipated Q&A):**
 > **Q: Why not Server Actions for everything?** A: Mutations only. Reads are RSC.
-> **Q: TanStack Start / Remix?** A: They have RSC too. Same model, different ergonomics. Decision tree on slide 13 still holds.
-> **Q: WebSockets in production?** A: RSC fetches initial slice; client island opens the WS and prepends. Step-4 pattern.
-> **Q: What if the WebSocket is the only data source?** A: Don't model it as RSC — `await` on a never-resolving Promise hangs Suspense forever. Client island, every time.
+> **Q: TanStack Start / Remix?** A: They have RSC too. Same model, different ergonomics. Decision tree on slide 14 still holds.
+> **Q: WebSockets in production?** A: RSC fetches initial slice; client island opens the WS and prepends. Step-4 pattern; the failure on slide 13 shows what NOT to do.
 > **Q: Caching?** A: `revalidateTag` / `revalidatePath`. Out of scope of this talk; biggest production-RSC adoption concern. Without it, RSC's repeat-visit margin disappears.
 > **Q: Bundle didn't drop much in step-4 — why?** A: lightweight-charts dominates. Real apps with more structural panels see compounding savings.
 > **Q: How does `useOptimistic` actually revert?** A: Throw → base state doesn't update → displayed state reverts to base.
 > **Q: Express / Fastify backends?** A: RSC needs a runtime that understands the protocol — Next.js, Waku, Parcel-RSC. Not Express-compatible by design.
-> **Q: When NOT to use RSC?** A: Real-time visualizations / chat / collab / games / any high-frequency push → stay SPA + selective islands.
+> **Q: When NOT to use RSC?** A: Real-time visualizations / chat / collab / games / any high-frequency push → stay SPA + selective islands. Slide 13 covered the WebSocket failure mode; tick-rate stress is the same shape (high-frequency push isn't RSC's natural form).
 > **Q: Did you really build this in 3 days?** A: Yes — with an AI pair. The codebase is open; clone and reproduce.
 > **Q: How does this perform on warm reloads vs a well-cached SPA?** A: Without `revalidateTag`, CSR cached can match or beat RSC. Makarevich measured 800 ms CSR vs 750 ms RSC + Suspense; that gap inverts without server caching.
 
@@ -513,7 +556,7 @@ pnpm demo:1:prod # production build for measurements
 
 ## Image checklist (capture before stage)
 
-- [ ] **Hero screenshot** — dashboard at step-3 with HUD, dark theme · slides 1, 16
+- [ ] **Hero screenshot** — dashboard at step-3 with HUD, dark theme · slides 1, 17
 - [ ] **Five-panel grid** — full dashboard with archetype labels overlaid · slide 3
 - [ ] **HUD close-up** — bottom-right corner cropped, magnified · slide 5
 - [ ] **Step-1 dashboard** — HUD showing slow numbers · slide 6
@@ -522,8 +565,9 @@ pnpm demo:1:prod # production build for measurements
 - [ ] **RSC concept timeline diagram** — PHP/Rails → SPA → React 18 SSR → React 19 RSC · slide 9
 - [ ] **Tree diagram + DevTools Coverage** — step-3 vs step-4 chunk drop · slide 11
 - [ ] **Speed-ladder chart or table render** — clean dark-theme version of slide 12 table · slide 12
-- [ ] **Commit graph** — 5 commits across 3 days, AI-assisted · slide 14
-- [ ] **QR codes** — repo + Purple Technology · slides 15, 16
+- [ ] **Order-book hang screenshot** — Suspense fallback "awaiting first ws message…" with rose border · slide 13
+- [ ] **Commit graph** — 5 commits across 3 days, AI-assisted · slide 15
+- [ ] **QR codes** — repo + Purple Technology · slides 16, 17
   - `qrencode -o repo.png 'https://github.com/davidchocholaty/react-rsc'`
   - `qrencode -o purple.png 'https://purple-technology.com'`
 
@@ -535,16 +579,17 @@ pnpm demo:1:prod # production build for measurements
 |---|---|---|
 | Open + framing | 1–2 | 1 min |
 | Demo intro + roadmap + metrics | 3–5 | 2 min |
-| Steps 1–3 fast walkthrough (with values) | 6–8 | 4 min |
-| RSC concept + comparison | 9–10 | 2 min |
+| Steps 1–3 fast walkthrough (with values) | 6–8 | 3.5 min |
+| RSC concept + comparison | 9–10 | 1.5 min |
 | Step 4 RSC (with values) | 11 | 1.5 min |
 | Speed-ladder summary | 12 | 1.5 min |
-| Practical takeaway (pros/cons + decision tree) | 13 | 2 min |
-| AI accelerator | 14 | 1 min |
-| Resources | 15 | 0.5 min |
-| Q&A | 16 | ~3.5 min |
+| WebSocket-as-RSC failure (the big "no") | 13 | 1.5 min |
+| Practical takeaway (pros/cons + decision tree) | 14 | 2 min |
+| AI accelerator | 15 | 1 min |
+| Resources | 16 | 0.5 min |
+| Q&A | 17 | ~3 min |
 
-≈ 16.5 min content + 3.5 min Q&A = 20 min. **Never cut slide 12 (speed-ladder summary)** — it's the slide audience photographs. **Slides 6–8 are deliberately fast** — read the numbers, point at the win, move on.
+≈ 17 min content + 3 min Q&A = 20 min. **Never cut slides 12 (speed ladder) or 13 (WS failure)** — these are the load-bearing beats. **Slides 6–8 are deliberately fast** — read the numbers, point at the win, move on.
 
 ---
 
@@ -568,6 +613,7 @@ These stay honest framings — **say them, don't put them on the slides**. Slide
 1. **Step-1 baseline is artificially slow** — `await import('@/mocks/news.json')` in `useEffect` is theatrical, designed to make the lesson read at small-app scale.
 2. **Time-to-trade ≈ 0 ms is partly tautological** — microtask boundary by construction; visual feedback is the real lesson.
 3. **Bundle delta in step-4 is small here** — lightweight-charts is the heavy leaf; pattern > kilobytes.
-4. **Step-5 sharp edges (WS-as-RSC, cached CSR, tick-rate stress) cut for time** — covered as Q&A talking points and partially folded into slide 13's "when not to use RSC". If asked: WS-as-RSC hangs forever; cached CSR can beat cold RSC without server caching; high-frequency push isn't RSC's shape.
+4. **Step-5 sharp edges (cached CSR vs cold RSC, tick-rate stress) cut for time** — covered as Q&A talking points and the speed-ladder summary row. The WebSocket-as-RSC failure (slide 13) is the only step-5 beat that survived as a dedicated slide because it's the strongest content.
 5. **AI-assisted ≠ AI-written** — agents drafted, but every architectural decision was deliberate, every commit reviewed.
 6. **Speed ladder mixes sources** — your captured numbers + Makarevich cross-check; clarify aloud if asked.
+7. **WS-as-RSC failure is simulated** — `new Promise<BookSnapshot>(() => {})` — but the lesson is structural; a real WebSocket has the same failure shape because RSC's wire protocol is single-response.
