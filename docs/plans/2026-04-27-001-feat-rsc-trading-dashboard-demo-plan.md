@@ -1,7 +1,7 @@
 ---
 title: "feat: RSC Trading Dashboard Demo"
 type: feat
-status: active
+status: completed
 date: 2026-04-27
 origin: docs/brainstorms/rsc-trading-dashboard-demo-requirements.md
 ---
