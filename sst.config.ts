@@ -22,19 +22,7 @@ export default $config({
 			args.runtime = 'nodejs22.x'
 		})
 
-		// stacks
-		await import('./domains/transaction/features/deposit/stack')
-		const api = await import('./infra/api')
-
-		// dev commands visible when running sst dev
-		new sst.x.DevCommand('tRPC', {
-			link: [api.tRPCAPI],
-			dev: {
-				autostart: true,
-				command: 'pnpm --filter @purple-stack/trpc-api start:panel'
-			}
-		})
-
+		// Web is a Vite stub between U1 and U2; U2 replaces this with sst.aws.Nextjs.
 		const web = new sst.aws.StaticSite('Web', {
 			build: {
 				command: 'pnpm run --filter @purple-stack/web build',
@@ -44,9 +32,6 @@ export default $config({
 				autostart: true,
 				command: 'pnpm --filter @purple-stack/web dev',
 				directory: 'web'
-			},
-			environment: {
-				VITE_tRPCAPI_url: api.tRPCAPI.url
 			}
 		})
 

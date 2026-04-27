@@ -1,6 +1,0 @@
-export type { DepositFormProps } from './components/DepositForm'
-export { DepositForm } from './components/DepositForm'
-export type { DepositSummaryProps } from './components/DepositSummary'
-export { DepositSummary } from './components/DepositSummary'
-export { createDepositRoute } from './deposit.route'
-export { DepositPage } from './pages/DepositPage'
