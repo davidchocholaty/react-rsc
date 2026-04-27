@@ -83,3 +83,32 @@ export function appendTrade(
 export function roundTo2(value: number): number {
 	return Math.round(value * 100) / 100
 }
+
+/**
+ * Deterministically generate `count` historical trades from a seed. Used by
+ * server components (RecentTrades RSC initial render) and the chart's history
+ * pre-seed — both want stable output independent of the live feed singleton.
+ */
+export function generateTradeHistory(
+	seed: number,
+	count: number
+): readonly Trade[] {
+	const rng = mulberry32(seed)
+	let price = INITIAL_PRICE
+	const trades: Trade[] = []
+	for (let i = 0; i < count; i += 1) {
+		const noise = 0.0025 * (rng() - 0.5)
+		price = roundTo2(price * (1 + 0.0001 + noise))
+		const side: Side = rng() < 0.5 ? 'buy' : 'sell'
+		const offset = side === 'buy' ? 0.05 : -0.05
+		const size = roundTo2(0.5 + rng() * 4.5)
+		trades.push({
+			id: i,
+			tickId: i + 1,
+			price: roundTo2(price + offset),
+			size,
+			side
+		})
+	}
+	return trades.reverse()
+}

@@ -18,9 +18,22 @@ vi.mock('next/web-vitals', () => ({
 	useReportWebVitals: () => undefined
 }))
 
+// RecentTrades is an async server component (await + setTimeout) — render its
+// fallback skeleton synchronously in the smoke test so we can assert the page
+// shape without driving an RSC pipeline through jsdom.
+vi.mock('@/app/_components/RecentTrades', async () => {
+	const actual = await vi.importActual<
+		typeof import('@/app/_components/RecentTrades')
+	>('@/app/_components/RecentTrades')
+	return {
+		...actual,
+		RecentTrades: actual.RecentTradesSkeleton
+	}
+})
+
 import DashboardPage from '@/app/page'
 
-describe('dashboard page (step-1 smoke)', () => {
+describe('dashboard page (step-2 smoke)', () => {
 	beforeEach(() => {
 		vi.stubEnv('NEXT_PUBLIC_HUD', '1')
 	})
@@ -30,7 +43,7 @@ describe('dashboard page (step-1 smoke)', () => {
 		vi.unstubAllEnvs()
 	})
 
-	it('renders all five panels', () => {
+	it('renders all five panel landmarks', () => {
 		render(<DashboardPage />)
 		expect(
 			screen.getByRole('region', { name: /price chart/i })
