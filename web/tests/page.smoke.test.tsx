@@ -33,7 +33,7 @@ vi.mock('@/app/_components/RecentTrades', async () => {
 
 import DashboardPage from '@/app/page'
 
-describe('dashboard page (step-2 smoke)', () => {
+describe('dashboard page (step-5 smoke)', () => {
 	beforeEach(() => {
 		vi.stubEnv('NEXT_PUBLIC_HUD', '1')
 	})
@@ -43,8 +43,11 @@ describe('dashboard page (step-2 smoke)', () => {
 		vi.unstubAllEnvs()
 	})
 
-	it('renders all five panel landmarks', () => {
-		render(<DashboardPage />)
+	it('renders all five panel landmarks in RSC mode (default)', async () => {
+		const element = await DashboardPage({
+			searchParams: Promise.resolve({})
+		})
+		render(element)
 		expect(
 			screen.getByRole('region', { name: /price chart/i })
 		).toBeInTheDocument()
@@ -53,6 +56,22 @@ describe('dashboard page (step-2 smoke)', () => {
 		).toBeInTheDocument()
 		expect(
 			screen.getByRole('region', { name: /order ticket/i })
+		).toBeInTheDocument()
+		expect(
+			screen.getByRole('region', { name: /news and research/i })
+		).toBeInTheDocument()
+		expect(
+			screen.getByRole('region', { name: /recent trades/i })
+		).toBeInTheDocument()
+	})
+
+	it('renders all five panel landmarks in CSR mode (?csr=1)', async () => {
+		const element = await DashboardPage({
+			searchParams: Promise.resolve({ csr: '1' })
+		})
+		render(element)
+		expect(
+			screen.getByRole('region', { name: /price chart/i })
 		).toBeInTheDocument()
 		expect(
 			screen.getByRole('region', { name: /news and research/i })
