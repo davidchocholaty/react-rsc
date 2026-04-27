@@ -22,17 +22,11 @@ export default $config({
 			args.runtime = 'nodejs22.x'
 		})
 
-		// Web is a Vite stub between U1 and U2; U2 replaces this with sst.aws.Nextjs.
-		const web = new sst.aws.StaticSite('Web', {
-			build: {
-				command: 'pnpm run --filter @purple-stack/web build',
-				output: 'web/dist'
-			},
-			dev: {
-				autostart: true,
-				command: 'pnpm --filter @purple-stack/web dev',
-				directory: 'web'
-			}
+		// The demo runs locally; deploy is opt-in for the post-talk public URL.
+		// See plan: R20 (deferred), and SST/OpenNext caveats called out in
+		// docs/plans/2026-04-27-001-feat-rsc-trading-dashboard-demo-plan.md.
+		const web = new sst.aws.Nextjs('Web', {
+			path: 'web'
 		})
 
 		return {

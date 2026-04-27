@@ -2,12 +2,22 @@ packages:
   - 'packages/*'
   - 'web'
 catalog:
+  "@tailwindcss/postcss": 4.2.2
+  "@testing-library/jest-dom": 6.9.1
+  "@testing-library/react": 16.3.2
   "@tsconfig/node22": 22.0.2
   "@types/aws-lambda": 8.10.155
   "@types/react": 19.2.2
   "@types/react-dom": 19.2.1
-  "react": 19.2.0
-  "react-dom": 19.2.0
-  "sst": 4.3.6
-  "typescript": 5.9.3
-  "zod": 4.1.12
+  "@vitejs/plugin-react": 5.2.0
+  jsdom: 25.0.1
+  "lightweight-charts": 5.2.0
+  next: 15.5.15
+  postcss: 8.5.9
+  react: 19.2.0
+  react-dom: 19.2.0
+  sst: 4.3.6
+  tailwindcss: 4.2.2
+  typescript: 5.9.3
+  vitest: 3.2.4
+  zod: 4.1.12
