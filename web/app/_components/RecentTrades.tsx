@@ -1,3 +1,4 @@
+import { TradesLiveTail } from '@/app/_components/TradesLiveTail'
 import { generateTradeHistory, type Trade } from '@/mocks/seed'
 
 const RECENT_TRADES_HISTORY_SEED = 0xbadcafe0
@@ -13,16 +14,7 @@ async function loadInitialTrades(): Promise<readonly Trade[]> {
 }
 
 export async function RecentTrades() {
-	const trades = await loadInitialTrades()
-	return <RecentTradesShell trades={trades} live={false} />
-}
-
-interface RecentTradesShellProps {
-	readonly trades: readonly Trade[]
-	readonly live: boolean
-}
-
-export function RecentTradesShell({ trades, live }: RecentTradesShellProps) {
+	const initialTrades = await loadInitialTrades()
 	return (
 		<section
 			aria-label="Recent trades"
@@ -33,47 +25,11 @@ export function RecentTradesShell({ trades, live }: RecentTradesShellProps) {
 					RECENT TRADES
 				</span>
 				<span className="text-[10px] uppercase tracking-wider text-zinc-500">
-					{live ? 'RSC initial · client tail' : 'RSC streamed · Suspense'}
+					RSC initial · client tail
 				</span>
 			</header>
-			<div className="grid grid-cols-[auto_1fr_auto_auto] gap-x-3 gap-y-1 font-mono text-[11px] tabular-nums">
-				<div className="text-[10px] uppercase tracking-wider text-zinc-500">
-					side
-				</div>
-				<div className="text-[10px] uppercase tracking-wider text-zinc-500">
-					price
-				</div>
-				<div className="text-[10px] uppercase tracking-wider text-zinc-500">
-					size
-				</div>
-				<div className="text-[10px] uppercase tracking-wider text-zinc-500">
-					tick
-				</div>
-				{trades.length === 0 ? (
-					<div className="col-span-4 text-zinc-600">awaiting prints…</div>
-				) : (
-					trades
-						.slice(0, VISIBLE_TRADES)
-						.map((trade) => <TradeRow key={trade.id} trade={trade} />)
-				)}
-			</div>
+			<TradesLiveTail initialTrades={initialTrades} />
 		</section>
-	)
-}
-
-interface TradeRowProps {
-	readonly trade: Trade
-}
-
-function TradeRow({ trade }: TradeRowProps) {
-	const sideClass = trade.side === 'buy' ? 'text-emerald-400' : 'text-rose-400'
-	return (
-		<>
-			<div className={sideClass}>{trade.side}</div>
-			<div className="text-zinc-200">{trade.price.toFixed(2)}</div>
-			<div className="text-zinc-300">{trade.size.toFixed(2)}</div>
-			<div className="text-zinc-500">#{trade.tickId}</div>
-		</>
 	)
 }
 

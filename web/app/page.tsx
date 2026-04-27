@@ -39,11 +39,11 @@ function DashboardHeader() {
 					RSC Trading Dashboard
 				</h1>
 				<p className="text-[11px] text-zinc-500">
-					symbol: BRNO/EUR · session demo · step-3-optimistic-ui
+					symbol: BRNO/EUR · session demo · step-4-rsc-boundary
 				</p>
 			</div>
-			<span className="rounded border border-zinc-800 bg-zinc-950 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-emerald-400">
-				optimistic UI
+			<span className="rounded border border-zinc-800 bg-zinc-950 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-violet-400">
+				RSC boundary
 			</span>
 		</header>
 	)
