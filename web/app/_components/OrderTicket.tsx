@@ -1,57 +1,97 @@
 'use client'
 
-import { type FormEvent, useState } from 'react'
+import { useActionState, useOptimistic, useState } from 'react'
+import { placeTrade } from '@/app/_actions/placeTrade'
 import { markTradeClick, markTradeCommitted } from '@/lib/perf'
 import { feed } from '@/mocks/feed'
 
-const PLACE_TRADE_LATENCY_MS = 600
+type Side = 'buy' | 'sell'
 
-interface SubmittedTrade {
-	readonly side: 'buy' | 'sell'
+interface DisplayedTrade {
+	readonly side: Side
 	readonly size: number
 	readonly price: number
-	readonly tickId: number
+	readonly pending: boolean
+	readonly tradeId?: string
 }
 
-async function placeTradeStub(): Promise<void> {
-	// Step-1 baseline: trade placement is a plain client-side delay. Step-3
-	// (U7) replaces this with a Server Action and useOptimistic so the click
-	// feedback collapses to ~0ms.
-	await new Promise((resolve) => setTimeout(resolve, PLACE_TRADE_LATENCY_MS))
+interface OrderState {
+	readonly last: DisplayedTrade | null
+	readonly error: string | null
+}
+
+const INITIAL_STATE: OrderState = { last: null, error: null }
+
+async function runPlaceTrade(
+	prev: OrderState,
+	formData: FormData
+): Promise<OrderState> {
+	// Snapshot the current price on the client at submit time. Server-side
+	// price discovery would belong to a real broker; the demo's "fill price"
+	// is whatever the local feed shows at click time.
+	const clientPrice = feed.getSnapshot().price
+	try {
+		const result = await placeTrade(formData)
+		return {
+			last: {
+				side: result.side,
+				size: result.size,
+				price: clientPrice,
+				pending: false,
+				tradeId: result.tradeId
+			},
+			error: null
+		}
+	} catch (error) {
+		// Server action threw (validation failure or simulated broker rejection).
+		// Returning prev preserves the previously-committed trade and surfaces
+		// the error inline; the optimistic pending row is replaced because the
+		// base state didn't gain a new entry.
+		return {
+			...prev,
+			error: error instanceof Error ? error.message : 'Trade failed'
+		}
+	}
 }
 
 export function OrderTicket() {
-	const [side, setSide] = useState<'buy' | 'sell'>('buy')
-	const [size, setSize] = useState('1')
-	const [submitting, setSubmitting] = useState(false)
-	const [last, setLast] = useState<SubmittedTrade | null>(null)
-	const [error, setError] = useState<string | null>(null)
+	const [side, setSide] = useState<Side>('buy')
+	const [state, formAction, isPending] = useActionState(
+		runPlaceTrade,
+		INITIAL_STATE
+	)
+	const [optimistic, addOptimistic] = useOptimistic<OrderState, DisplayedTrade>(
+		state,
+		(_current, optimisticTrade) => ({
+			last: optimisticTrade,
+			error: null
+		})
+	)
 
-	async function onSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
-		event.preventDefault()
-		setError(null)
-		const parsed = Number.parseFloat(size)
-		if (!Number.isFinite(parsed) || parsed <= 0) {
-			setError('Size must be a positive number')
+	function clientAction(formData: FormData): void {
+		const sizeRaw = formData.get('size')?.toString() ?? ''
+		const size = Number.parseFloat(sizeRaw)
+		if (!Number.isFinite(size) || size <= 0) {
+			// React 19's useActionState skips the action when the form action
+			// returns early, but we still want a friendly inline message rather
+			// than a server round-trip that just throws "must be positive".
 			return
 		}
-
 		markTradeClick()
-		setSubmitting(true)
-		try {
-			await placeTradeStub()
-			const snapshot = feed.getSnapshot()
-			setLast({
-				side,
-				size: parsed,
-				price: snapshot.price,
-				tickId: snapshot.tickId
-			})
-			markTradeCommitted()
-		} finally {
-			setSubmitting(false)
-		}
+		addOptimistic({
+			side,
+			size,
+			price: feed.getSnapshot().price,
+			pending: true
+		})
+		// The optimistic state is now applied (microtask boundary); time-to-
+		// trade collapses to ≈0 ms compared to step-2's 600 ms server delay.
+		markTradeCommitted()
+		formAction(formData)
 	}
+
+	const display = optimistic.last
+	const isStale = display?.pending === true
 
 	return (
 		<section
@@ -63,10 +103,11 @@ export function OrderTicket() {
 					ORDER TICKET
 				</span>
 				<span className="text-[10px] uppercase tracking-wider text-zinc-500">
-					optimistic
+					optimistic · server action
 				</span>
 			</header>
-			<form onSubmit={onSubmit} className="grid grid-cols-2 gap-2 text-xs">
+			<form action={clientAction} className="grid grid-cols-2 gap-2 text-xs">
+				<input type="hidden" name="side" value={side} />
 				<div className="col-span-2 inline-flex overflow-hidden rounded border border-zinc-800">
 					<button
 						type="button"
@@ -95,26 +136,35 @@ export function OrderTicket() {
 					Size
 					<input
 						type="number"
+						name="size"
 						min="0"
 						step="0.1"
-						value={size}
-						onChange={(event) => setSize(event.target.value)}
+						defaultValue="1"
 						className="rounded border border-zinc-800 bg-zinc-950 px-2 py-1 font-mono text-xs text-zinc-100 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
 					/>
 				</label>
 				<button
 					type="submit"
-					disabled={submitting}
+					disabled={isPending}
 					className="col-span-2 rounded bg-cyan-500/20 py-1.5 text-xs font-semibold text-cyan-200 hover:bg-cyan-500/30 disabled:opacity-50"
 				>
-					{submitting ? 'sending…' : `Place ${side.toUpperCase()}`}
+					Place {side.toUpperCase()}
 				</button>
 			</form>
-			{error ? <div className="text-[11px] text-rose-400">{error}</div> : null}
-			{last ? (
-				<div className="rounded border border-zinc-800 bg-zinc-950/60 p-2 font-mono text-[11px] tabular-nums text-zinc-300">
-					last {last.side} · {last.size.toFixed(2)} @ {last.price.toFixed(2)}
-					<span className="ml-2 text-zinc-500">tick #{last.tickId}</span>
+			{optimistic.error ? (
+				<div className="text-[11px] text-rose-400">{optimistic.error}</div>
+			) : null}
+			{display ? (
+				<div
+					className={`rounded border border-zinc-800 bg-zinc-950/60 p-2 font-mono text-[11px] tabular-nums text-zinc-300 transition-opacity ${
+						isStale ? 'opacity-50' : 'opacity-100'
+					}`}
+				>
+					last {display.side} · {display.size.toFixed(2)} @{' '}
+					{display.price.toFixed(2)}
+					<span className="ml-2 text-zinc-500">
+						{isStale ? '(sending…)' : `#${display.tradeId ?? '—'}`}
+					</span>
 				</div>
 			) : null}
 		</section>
