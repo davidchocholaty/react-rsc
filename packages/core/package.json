@@ -3,11 +3,8 @@
 	"type": "module",
 	"version": "0.0.0",
 	"scripts": {
-		"test": "vitest --run",
+		"test": "vitest --run --passWithNoTests",
 		"typecheck": "tsc --build"
-	},
-	"exports": {
-		"./deposit": "./src/deposit/deposit.ts"
 	},
 	"dependencies": {
 		"sst": "catalog:"

@@ -31,7 +31,12 @@ dist/
 !sst-env.d.ts
 # And keep the global.d.ts from SST platform
 !.sst/platform/src/global.d.ts
+# And keep Next.js-generated type shim
+!next-env.d.ts
+
+# Next.js
+.next
+.vercel
 
 # Compiled config files (generated from .ts)
 /sst.config.js
-/web/vite.config.js

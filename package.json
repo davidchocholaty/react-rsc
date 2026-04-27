@@ -8,19 +8,26 @@
 		"typecheck": "pnpm run -r typecheck",
 		"test": "pnpm run -r test",
 		"sst:deploy": "sst deploy --print-logs",
-		"sst:remove": "sst remove --print-logs"
+		"sst:remove": "sst remove --print-logs",
+		"demo:1": "git switch -C live-1 step-1-naive-csr && pnpm install --frozen-lockfile && pnpm --filter @purple-stack/web dev",
+		"demo:2": "git switch -C live-2 step-2-suspense-streaming && pnpm install --frozen-lockfile && pnpm --filter @purple-stack/web dev",
+		"demo:3": "git switch -C live-3 step-3-optimistic-ui && pnpm install --frozen-lockfile && pnpm --filter @purple-stack/web dev",
+		"demo:4": "git switch -C live-4 step-4-rsc-boundary && pnpm install --frozen-lockfile && pnpm --filter @purple-stack/web dev",
+		"demo:5": "git switch -C live-5 step-5-honest-limits && pnpm install --frozen-lockfile && pnpm --filter @purple-stack/web dev",
+		"demo:1:prod": "git switch -C live-1 step-1-naive-csr && pnpm install --frozen-lockfile && pnpm --filter @purple-stack/web build && pnpm --filter @purple-stack/web start",
+		"demo:2:prod": "git switch -C live-2 step-2-suspense-streaming && pnpm install --frozen-lockfile && pnpm --filter @purple-stack/web build && pnpm --filter @purple-stack/web start",
+		"demo:3:prod": "git switch -C live-3 step-3-optimistic-ui && pnpm install --frozen-lockfile && pnpm --filter @purple-stack/web build && pnpm --filter @purple-stack/web start",
+		"demo:4:prod": "git switch -C live-4 step-4-rsc-boundary && pnpm install --frozen-lockfile && pnpm --filter @purple-stack/web build && pnpm --filter @purple-stack/web start",
+		"demo:5:prod": "git switch -C live-5 step-5-honest-limits && pnpm install --frozen-lockfile && pnpm --filter @purple-stack/web build && pnpm --filter @purple-stack/web start"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.6",
-		"@purple-stack/trpc-api": "workspace:*",
-		"@purple-stack/transaction": "workspace:*",
 		"@tsconfig/node22": "catalog:",
 		"@types/aws-lambda": "catalog:",
 		"typescript": "catalog:",
 		"@types/node": "22.18.6"
 	},
 	"dependencies": {
-		"@trpc/server": "catalog:",
 		"sst": "catalog:"
 	}
 }
