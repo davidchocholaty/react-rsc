@@ -56,6 +56,9 @@ Paste-ready content for the Canva deck `react_brno` (https://www.canva.com/desig
 
 ## Slide 03 — Demo app · financial dashboard
 
+despite the fact we develop client zone not so forced for the quick update, there are still situations we should focus on speed
+tady ukazu demo appku, kterou budu pouzivat behem prezentace. Popisu jednotlive casti, co obsahuje a proc zrovna tyhle casti jsem na dashboard zvolil a jsou dobre pro ukazku moznosti optimalizace a pro mereni
+
 **Footer:** `PURPLE TECHNOLOGY · 03 · React Brno #1`
 
 **Title:**
