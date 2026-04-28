@@ -13,64 +13,68 @@
     "aggregation": "median",
     "protocol": "./PROTOCOL.md"
   },
-
   "step1": {
     "tag": "step-1-naive-csr",
     "command": "pnpm demo:1:prod",
     "runs": [],
     "summary": null
   },
-
   "step2": {
     "tag": "step-2-suspense-streaming",
     "command": "pnpm demo:2:prod",
     "runs": [],
     "summary": null
   },
-
   "step3": {
     "tag": "step-3-optimistic-ui",
     "command": "pnpm demo:3:prod",
     "runs": [],
     "summary": null
   },
-
   "step4": {
     "tag": "step-4-rsc-boundary",
     "command": "pnpm demo:4:prod",
     "runs": [],
     "summary": null
   },
-
   "step5a": {
     "tag": "step-5a-rsc-ws-fail",
     "command": "git switch -C live-5a step-5a-rsc-ws-fail && pnpm install --frozen-lockfile && pnpm --filter @purple-stack/web build && pnpm --filter @purple-stack/web start",
     "outcome": "qualitative regression — Suspense fallback hangs forever; no metrics captured",
     "screenshotPath": "TODO — e.g. ./screenshots/5a-orderbook-hang.png"
   },
-
   "step5b": {
     "tag": "step-5-honest-limits",
     "command": "pnpm demo:5:prod",
     "csr": {
       "url": "http://localhost:3000/?csr=1",
-      "cold": { "runs": [], "summary": null },
-      "warm": { "runs": [], "summary": null }
+      "cold": {
+        "runs": [],
+        "summary": null
+      },
+      "warm": {
+        "runs": [],
+        "summary": null
+      }
     },
     "rsc": {
       "url": "http://localhost:3000/?csr=0",
-      "cold": { "runs": [], "summary": null },
-      "warm": { "runs": [], "summary": null }
+      "cold": {
+        "runs": [],
+        "summary": null
+      },
+      "warm": {
+        "runs": [],
+        "summary": null
+      }
     }
   },
-
   "step5c": {
     "tag": "step-5-honest-limits",
     "command": "pnpm demo:5:prod with /?tick=5 in 3 tabs",
     "tabs": [],
     "summary": null
   },
-
   "_runShape": {
     "_comment": "shape returned by `__hudStore.getSnapshot()` — paste each capture as one object into the matching `runs[]` array",
     "lcp": null,

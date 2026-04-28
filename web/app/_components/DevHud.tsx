@@ -57,13 +57,8 @@ function DevHudOverlay() {
 			className="pointer-events-none fixed right-3 bottom-3 z-50 rounded-md border border-zinc-800 bg-black/80 p-3 font-mono text-[11px] text-zinc-200 backdrop-blur"
 		>
 			<HudRow label="LCP" value={formatMs(snap.lcp)} />
-			<HudRow label="TTFB" value={formatMs(snap.ttfb)} />
-			<HudRow label="FCP" value={formatMs(snap.fcp)} />
 			<HudRow label="INP" value={formatMs(snap.inp)} />
-			<HudRow label="CLS" value={formatRatio(snap.cls)} />
 			<HudRow label="JS" value={formatBytes(snap.jsBytes)} />
-			<HudRow label="HYDR" value={formatMs(snap.hydrationMs)} />
-			<HudRow label="CHART" value={formatMs(snap.chartHydrationMs)} />
 			<HudRow label="TRADE" value={formatMs(snap.timeToTradeMs)} />
 		</aside>
 	)
@@ -95,9 +90,4 @@ function formatBytes(value: number | undefined): string {
 	if (value < 1024) return `${value} B`
 	if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} kB`
 	return `${(value / (1024 * 1024)).toFixed(2)} MB`
-}
-
-function formatRatio(value: number | undefined): string {
-	if (value === undefined) return '—'
-	return value.toFixed(3)
 }

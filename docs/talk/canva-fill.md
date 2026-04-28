@@ -41,43 +41,48 @@ Paste-ready content for the Canva deck `react_brno` (https://www.canva.com/desig
 **Title:**
 > Customers want the app to feel fast
 
-**Body:**
-> The app must **feel** fast — even on mobile, even on slow networks, even on tired hardware.
->
-> Every 100 ms of latency = −1% conversion (Amazon).
-> In trading, latency is **money** — lost fills, stale prices, abandoned orders.
->
-> **AI doesn't change this.** Even with coding agents, the **architectural decisions** — which tool, which boundary, which trade-off — are still ours. AI accelerates implementation; it doesn't choose the shape of the system.
+**Body (bullets):**
+> - Modern apps need to **feel fast** — on mobile, on slow networks, on tired hardware
+> - Performance is a **product feature**, not a polish step — speed is part of what users buy
+> - React 19 brought a new toolbox: **RSC, streaming, Server Actions, optimistic UI** — each fits a different problem, and choosing wrong costs more than choosing none
+> - AI accelerates implementation, but the **architectural decision is still ours** — and that's what this talk is about
 
-**Visual:** simple split layout. Left: stat callouts (mobile / slow network / 100 ms = −1%). Right: small icon of architect's drafting compass, captioned "still our job".
+**Visual:** clean 4-bullet layout on dark background. Optional small icon row at the bottom showing the four tools (RSC · streaming · Server Actions · optimistic) in muted accent colors.
 
 **Presenter notes:**
-> Performance is product, not polish. We aren't optimizing for benchmarks — we're optimizing for the user clicking Place BUY before the price moves. AI agents help us iterate faster on these choices, but they don't make the choices. That's why a talk about RSC vs streaming vs optimistic still matters in 2026 — it's our job to know which one fits.
+> Performance is product, not polish. The point of this talk isn't a benchmark contest — it's that React 19 gave us several new tools that each solve a different shape of problem, and picking the right one still requires judgment. AI lets us try architectural ideas in hours instead of sprints, but it doesn't make the architectural choice for us. That's why a talk about RSC vs streaming vs optimistic still matters in 2026 — it's our job to know which lever fits which problem. The next slides walk through the demo, the metrics, and five concrete steps of that decision in action.
 
 ---
 
 ## Slide 03 — Demo app · financial dashboard
+
+despite the fact we develop client zone not so forced for the quick update, there are still situations we should focus on speed
+tady ukazu demo appku, kterou budu pouzivat behem prezentace. Popisu jednotlive casti, co obsahuje a proc zrovna tyhle casti jsem na dashboard zvolil a jsou dobre pro ukazku moznosti optimalizace a pro mereni
 
 **Footer:** `PURPLE TECHNOLOGY · 03 · React Brno #1`
 
 **Title:**
 > Demo app — a fintech trading dashboard
 
-**Body:**
-> Five panels chosen to cover four architectural archetypes:
->
-> **Price chart** → client island (canvas, lightweight-charts) · cyan
-> **Order book** → client + ws-style subscription · cyan
-> **Order ticket** → optimistic + Server Action · emerald
-> **News / research** → server-fetched read · violet
-> **Recent trades** → streamed (Suspense) + tiny client tail · violet
->
-> Symbol is decorative; data layer is symbol-agnostic. Each panel maps to one archetype on purpose, so when the architecture changes, you see exactly which panel changed.
+**Body:** _(none — screenshot speaks for itself; talk over it)_
 
-**Visual:** 2×3 grid screenshot of the dashboard with each panel labeled by archetype.
+**Visual:** full-bleed screenshot of the dashboard at `step-3-optimistic-ui` (or `step-4-rsc`) on a dark background. No labels, no overlays, no annotations — just the app. Footer + slide number stay.
 
 **Presenter notes:**
-> A toy trading dashboard. Aesthetically plausible fintech without claiming domain accuracy. Even if your day job is a slower-cadence client zone (like ours at Purple), there are always parts of the product where speed matters — login, dashboards, orders, anything the user is waiting for. This dashboard is dense enough to demonstrate every pattern we'll discuss.
+> _Three beats — what it contains, why those specific panels, why this is the right shape for the talk._
+>
+> **What it contains.** Five panels: price chart, order book, order ticket (BUY / SELL), news / research, recent trades. A toy trading dashboard — aesthetically plausible fintech, no claim of domain accuracy. Symbol is decorative, data layer is mocked.
+>
+> **Why those specific panels.** Each panel maps to a different architectural pattern, on purpose:
+> · price chart → heavy client island (canvas / lightweight-charts)
+> · order book → real-time push (WebSocket-shaped subscription)
+> · order ticket → mutation that needs optimistic feedback + Server Action
+> · news / research → static server-fetched read
+> · recent trades → streamed initial render + tiny client tail
+>
+> Five panels, four architectural shapes. So when we change the architecture across the five steps, you can see *exactly* which panel moved — the demo isolates the lesson.
+>
+> **Why this is useful for our purpose.** Fintech is a fair excuse for "every millisecond matters" without overclaiming. Even if your day job is a slower-cadence app (like ours at Purple), there are always parts of the product where speed matters — login, dashboards, mutations, anything the user is waiting for. This dashboard is dense enough to demonstrate every pattern we'll discuss but small enough to fit on one screen and one slot.
 
 ---
 
@@ -112,24 +117,19 @@ Paste-ready content for the Canva deck `react_brno` (https://www.canva.com/desig
 > Metrics · what we measure, and why
 
 **Body:**
-> **Web Vitals** (Next.js `useReportWebVitals`):
-> · **LCP** — Largest Contentful Paint (does the page feel painted?)
-> · **TTFB** — Time To First Byte (server responsiveness)
-> · **FCP** — First Contentful Paint (something visible)
-> · **INP** — Interaction to Next Paint (does click→visible feel snappy?)
-> · **CLS** — Cumulative Layout Shift (no jumping)
+> Four metrics on the HUD — one per slide where they earn their keep:
 >
-> **Custom marks** (`performance.measure`):
-> · **JS bytes shipped** (sum of `.js` transferSize)
-> · **Hydration time** (root + chart island)
-> · **Time-to-trade** (Place BUY click → optimistic commit)
+> · **LCP** — Largest Contentful Paint · does the page feel painted? *(slides 6 → 7)*
+> · **INP** — Interaction to Next Paint · does click → visible feel snappy? *(slide 8)*
+> · **JS** — JS bytes shipped · how heavy is the bundle? *(slides 6, 11)*
+> · **TRADE** — Place BUY click → optimistic commit · the headline interaction number *(slide 8)*
 >
-> Live HUD in the corner: `NEXT_PUBLIC_HUD=1` · reads via `useSyncExternalStore` from a singleton store.
+> Live HUD bottom-right of the dashboard, gated by `NEXT_PUBLIC_HUD=1`.
 
-**Visual:** 2×4 grid of metric cards, each metric paired with the question it answers ("does the page feel painted?", etc.).
+**Visual:** 2×2 grid of metric cards. Each card: the four-letter HUD label (LCP / INP / JS / TRADE) + the question it answers + which step's clip makes it move. Match the HUD's accent colors so the audience builds the link before they see the clips.
 
 **Presenter notes:**
-> Web Vitals are the standard browser-level numbers. Custom marks fill the gaps — bundle size and the user-feels metrics like time-to-trade. The HUD is gated behind an env var so production builds don't pay for it. When I say a number moves, the HUD is telling you. We'll see five sets of these numbers, one per step.
+> Four metrics, one per lesson. LCP for the streaming win. INP for "does the click feel fast." JS bytes for the RSC-at-leaves bundle drop. TRADE for the optimistic-UI headline. The HUD overlay shows these four live in every embedded clip — when I say a number moves, the HUD in the clip is telling you. Aside: standard Web Vitals also include TTFB / FCP / CLS, but those don't change meaningfully across these steps so they'd just be noise on screen — the store still tracks them for anyone reproducing the numerical protocol.
 
 ---
 
@@ -143,11 +143,10 @@ Paste-ready content for the Canva deck `react_brno` (https://www.canva.com/desig
 **Body:**
 > Every panel `'use client'`. Data fetched in `useEffect`. No Suspense.
 >
-> **Measured (this codebase, throttled Slow 4G + 6× CPU, median of 5):**
-> · LCP: _step1.summary.lcp_ ms
-> · TTFB: _step1.summary.ttfb_ ms
-> · JS shipped: _step1.summary.jsBytes_ kB
-> · Time-to-trade: _step1.summary.timeToTradeMs_ ms (~600 ms expected)
+> **Embedded clip — `step-1.mov`** · cold reload under Slow 4G + 6× CPU. Numbers visible in the HUD overlay:
+> · LCP — slow paint
+> · JS shipped — large bundle
+> · Time-to-trade — ~600 ms (server confirms before UI moves)
 
 **Code (compact):**
 ```tsx
@@ -161,9 +160,12 @@ export function NewsPanel() {
 }
 ```
 
-**Visual:** screenshot of dashboard at step-1 with HUD visible. Annotate the slow rows in red.
+**Visual:** play `step-1.mov` (~10–15 s) inline. Annotate slow HUD rows in red post-capture if Canva permits, or rely on the natural HUD reading.
 
-**Demo cue:** `pnpm demo:1` → reload throttled. Read HUD aloud. **Fly through this fast.**
+**Demo cue:** clip plays automatically; narrate over it. **Fly through this fast** — let the audience feel the slowness, then move on.
+
+**Capture notes (record at home):**
+> `pnpm demo:1:prod` → DevTools throttled (Slow 4G + 6× CPU) → cold hard reload → QuickTime screen recording → trim to 10–15 s → export `step-1.mov`. HUD must be visible.
 
 **Presenter notes:**
 > This is what most React tutorials look like. Five client components, all data fetching after mount. Large bundle, slow paint, ~600 ms time-to-trade. Don't dwell — the audience needs to see the numbers and feel the slowness, then move on.
@@ -180,10 +182,10 @@ export function NewsPanel() {
 **Body:**
 > Drop `'use client'` on data-shaped panels. Await server-side. One `<Suspense>` per independent slow read.
 >
-> **Measured (same throttling):**
-> · LCP: _step2.summary.lcp_ ms — **Δ vs step 1: -X%**
-> · Secondary content visible time collapses (skeletons → real content)
-> · JS shipped: _step2.summary.jsBytes_ kB (mostly unchanged — chart still client)
+> **Embedded clip — `step-2.mov`** · cold reload, same throttling. The reveal is the lesson:
+> · Static shell paints first — LCP collapses vs step 1
+> · Skeletons → real content as panels stream in
+> · JS shipped barely moves yet — chart canvas is still client
 
 **Code (before / after, compact):**
 ```tsx
@@ -195,9 +197,12 @@ export function NewsPanel() {          export function NewsPanel() {
 }
 ```
 
-**Visual:** two-column diagram — client-fetch waterfall (left) vs streaming with static shell + per-panel arrival (right).
+**Visual:** play `step-2.mov` (~10–15 s) inline. Optional: a small two-column diagram alongside — client-fetch waterfall (left) vs streaming with static shell + per-panel arrival (right) — for the audience to anchor what they're watching.
 
-**Demo cue:** `pnpm demo:2`. Reload throttled. **Fly through fast** — point at the secondary-content delta.
+**Demo cue:** clip plays automatically; point at the moment skeletons resolve into real panels. **Fly through fast** — that single transition is the whole lesson.
+
+**Capture notes (record at home):**
+> `pnpm demo:2:prod` → same throttling → cold hard reload → record the full reveal (shell → skeletons → arrived content) → trim to 10–15 s → export `step-2.mov`.
 
 **Presenter notes:**
 > One Suspense per independent data dependency — not one giant boundary, not popcorn-on-every-leaf. Goldilocks zone. Bundle doesn't move yet because chart canvas is still client; secondary-content visible time is the metric to watch.
@@ -215,10 +220,10 @@ export function NewsPanel() {          export function NewsPanel() {
 > Click → instant feedback. Server confirms in 600 ms. UI doesn't wait.
 > Throw to revert · return to commit.
 >
-> **Measured:**
-> · Time-to-trade: _step3.summary.timeToTradeMs_ ms — **Δ vs step 1: ~600 ms → ~0 ms**
+> **Embedded clip — `step-3.mov`** · 2–3 Place BUY clicks. Numbers visible in the HUD overlay:
+> · Time-to-trade: ~600 ms → ~0 ms (the headline number)
 > · INP improves (click response within microtask boundary)
-> · LCP / JS bytes: roughly unchanged (this step is interaction, not paint)
+> · LCP / JS bytes: roughly unchanged — this step is interaction, not paint
 
 **Code (left — client):**
 ```tsx
@@ -247,9 +252,12 @@ export async function placeTrade(formData: FormData): Promise<PlaceTradeResult> 
 }
 ```
 
-**Visual:** 3-frame storyboard — click → "(sending…)" pending row → 600 ms later, solid row.
+**Visual:** play `step-3.mov` (~10–15 s) inline. Optional: a small 3-frame storyboard alongside — click → "(sending…)" pending row → 600 ms later, solid row — to anchor what the clip is showing.
 
-**Demo cue:** `pnpm demo:3`. Click Place BUY 3-4 times. **Fly through fast** — the visible feedback is the lesson.
+**Demo cue:** clip plays automatically. **Fly through fast** — the visible feedback is the lesson; the moment the optimistic row appears is the headline beat.
+
+**Capture notes (record at home):**
+> `pnpm demo:3:prod` → throttle + cold reload, wait for page to settle → click Place BUY 2–3× with ~1–2 s gaps → trim to 10–15 s starting from just before the first click → export `step-3.mov`.
 
 **Presenter notes:**
 > Strongest user-visible win in the demo. Throw contract: action throws → base state doesn't update → optimistic state reverts. Returning `{ ok: false }` instead of throwing leaves the optimistic row stuck. Production rule: revalidation failure after a successful trade should NOT throw — otherwise you revert UI for a trade that actually happened.
@@ -313,10 +321,10 @@ export async function placeTrade(formData: FormData): Promise<PlaceTradeResult> 
 **Body:**
 > Push `'use client'` to the leaves. Server components wrap; tiny islands subscribe.
 >
-> **Measured:**
-> · JS shipped: _step4.summary.jsBytes_ kB — **Δ vs step 3: -X kB**
+> **Embedded clip — `step-4.mov`** + **DevTools Coverage diff (`coverage-3-vs-4.png`)**:
+> · JS shipped drops vs step 3 — the Coverage screenshot is the headline visual
 > · LCP / TTFB roughly unchanged (already optimized in step 2)
-> · Hydration time: _step4.summary.hydrationMs_ ms — only islands hydrate
+> · Hydration time: only islands hydrate, not the whole tree
 
 **Code (server):**
 ```tsx
@@ -344,9 +352,15 @@ export function TradesLiveTail({ initialTrades }) {
 }
 ```
 
-**Visual:** tree diagram — layout (server) → page (server) → recent-trades (server) → live tail (client). Highlight only the leaf as client. Inset: DevTools Coverage panel diff (step-3 vs step-4).
+**Visual:** tree diagram — layout (server) → page (server) → recent-trades (server) → live tail (client). Highlight only the leaf as client. Inset: `coverage-3-vs-4.png` — DevTools Coverage screenshot showing chunks dropped between step 3 and step 4 (the static evidence). Optional: `step-4.mov` plays alongside if there's room.
 
-**Demo cue:** `pnpm demo:4`. Open DevTools → Coverage / Network.
+**Demo cue:** point at the Coverage inset — chunks-dropped count is the take-home. The clip is supplementary.
+
+**Capture notes (record at home):**
+> 1. `pnpm demo:3:prod` → DevTools → Coverage tab → Start instrumenting → reload → screenshot the JS bytes total. Save as left half of `coverage-3-vs-4.png`.
+> 2. `pnpm demo:4:prod` → same → screenshot. Save as right half.
+> 3. Compose side-by-side in any image editor (or two adjacent slide images).
+> 4. Optional: also record `step-4.mov` (cold reload, ~10 s) showing the dashboard painting with smaller bundle.
 
 **Presenter notes:**
 > Wrapping `<section>` and the initial 12 trades render on the server — already-painted HTML. Only the live subscription is client. Smallest possible client surface. Lightweight-charts dominates this specific bundle, so the delta is modest here; the pattern compounds across structural panels in real apps.
@@ -361,15 +375,15 @@ export function TradesLiveTail({ initialTrades }) {
 > Summary — what each step actually moved
 
 **Body (table):**
-> | Step | Change | Metric | This codebase ² | Cross-check ¹ |
-> |---|---|---|---|---|
-> | 1 → 2 | Suspense + streaming | Secondary content visible | _step1.lcp → step2.lcp_ | **~4.4 s → ~1.28 s** |
-> | 2 → 3 | `useOptimistic` + Server Action | Time-to-trade | _step2.timeToTradeMs → step3.timeToTradeMs_ | (in-demo metric) |
-> | 3 → 4 | `'use client'` at the leaves | JS shipped | _step3.jsBytes → step4.jsBytes_ | pattern compounds |
-> | warm reload | Cached CSR vs cold RSC | LCP | _step5b.csr.warm.lcp vs step5b.rsc.warm.lcp_ | **~800 ms vs ~750 ms** |
+> | Step | Change | What moves | Reference numbers ¹ |
+> |---|---|---|---|
+> | 1 → 2 | Suspense + streaming | LCP / secondary-content visible | **~4.4 s → ~1.28 s** |
+> | 2 → 3 | `useOptimistic` + Server Action | Time-to-trade | **~600 ms → ~0 ms** (visible in `step-3.mov`) |
+> | 3 → 4 | `'use client'` at the leaves | JS shipped (DevTools Coverage delta) | pattern compounds in real apps |
+> | warm reload | Cached CSR vs cold RSC | LCP | **~800 ms vs ~750 ms** |
 >
 > _¹ Nadia Makarevich, developerway.com, Oct 2025 — Slow 4G + 6× CPU._
-> _² This codebase, captured per `docs/talk/measurements/PROTOCOL.md`; medians of 5 runs at matching throttling._
+> _Reproducible via `docs/talk/measurements/PROTOCOL.md`. The embedded clips on steps 1–4 show the HUD updating in real time — that's the second column of evidence the audience already saw._
 
 **Body (lessons):**
 > **Honest takeaways:**
@@ -381,7 +395,7 @@ export function TradesLiveTail({ initialTrades }) {
 **Visual:** stacked horizontal bar chart per metric, one bar per step. Color rows: emerald = improvement, rose = regression. Or just the table on a clean dark background.
 
 **Presenter notes:**
-> The slide audience photographs. Two columns of evidence: this codebase's own captured numbers and Makarevich's published cross-check. Honest takeaways in the bottom block. Next slide is the load-bearing "do not do this" beat — keep momentum.
+> The slide audience photographs. One column of reference numbers (Makarevich's published cross-check) plus the HUD they already saw move in the embedded clips during steps 1–4. Honest takeaways in the bottom block. Next slide is the load-bearing "do not do this" beat — keep momentum.
 
 ---
 
@@ -415,17 +429,21 @@ export async function OrderBookRsc() {
 }
 ```
 
-**Visual:** screenshot of the order-book panel showing "awaiting first ws message…" Suspense fallback. Rest of dashboard normal. Rose accent border on the failing panel.
+**Visual:** play `step-13.mov` (~10 s) showing the order-book panel stuck on "awaiting first ws message…" Suspense fallback while the rest of the dashboard renders normally. Rose accent border on the failing panel. If the clip doesn't play for any reason, the screenshot fallback (`step-13-orderbook-hang.png`) carries the slide.
 
-**Demo cue:**
-1. `git switch -C live-5a step-5a-rsc-ws-fail`
-2. `pnpm install --frozen-lockfile`
-3. `pnpm --filter @purple-stack/web dev`
-4. Reload — order book hangs forever; the rest of the dashboard still works
-5. Switch back: `git switch -` then `pnpm demo:5`
+**Demo cue:** clip plays automatically. Hold on screen long enough for the audience to notice the order book *never resolves* — that beat is the lesson.
+
+**Capture notes (record at home):**
+> 1. `git switch -C live-5a step-5a-rsc-ws-fail`
+> 2. `pnpm install --frozen-lockfile`
+> 3. `pnpm --filter @purple-stack/web build && pnpm --filter @purple-stack/web start`
+> 4. Reload — order book hangs forever; rest of the dashboard works
+> 5. QuickTime recording, hold ~10 s on the hung state → export `step-13.mov`
+> 6. Also screenshot the same frame → `step-13-orderbook-hang.png` (fallback for slide)
+> 7. Switch back: `git switch -`
 
 **Presenter notes:**
-> The strongest "do not do this" beat in the talk. RSC is single-response by design; WebSockets are inherently push-shaped. Modeling the second with the first is a category error, not a bug. The fix is what we already shipped in step 4 — keep the order book as a client island that subscribes via `useEffect`, with RSC providing the initial snapshot. If the live demo doesn't hang on stage for any reason, the slide does the work — the never-resolving Promise is unmistakable.
+> The strongest "do not do this" beat in the talk. RSC is single-response by design; WebSockets are inherently push-shaped. Modeling the second with the first is a category error, not a bug. The fix is what we already shipped in step 4 — keep the order book as a client island that subscribes via `useEffect`, with RSC providing the initial snapshot. The never-resolving Promise on the slide is unmistakable; the clip just makes the consequence visible.
 
 ---
 
@@ -551,21 +569,33 @@ pnpm demo:1:prod # production build for measurements
 > **Q: When NOT to use RSC?** A: Real-time visualizations / chat / collab / games / any high-frequency push → stay SPA + selective islands. Slide 13 covered the WebSocket failure mode; tick-rate stress is the same shape (high-frequency push isn't RSC's natural form).
 > **Q: Did you really build this in 3 days?** A: Yes — with an AI pair. The codebase is open; clone and reproduce.
 > **Q: How does this perform on warm reloads vs a well-cached SPA?** A: Without `revalidateTag`, CSR cached can match or beat RSC. Makarevich measured 800 ms CSR vs 750 ms RSC + Suspense; that gap inverts without server caching.
+> **Q: Are these techniques current in 2026?** A: Yes — every step is a recommended pattern from either the React core team or the Next.js team. RSC stable since React 19 (Dec 2024). `useOptimistic` and Server Actions stable in React 19. `'use client'` at the leaves is the canonical core-team recommendation. Nothing fundamental has shifted in the 6 months since Makarevich's article — adoption has just continued to grow (TanStack Start GA, Waku stable, Parcel-RSC).
+> **Q: Is this just rehashing Makarevich's article?** A: No. I cite her for the cross-codebase numbers on slide 12 because she ran the same Slow 4G + 6× CPU protocol — that's a credibility cross-check, not a copy. The React 19 interaction layer (step 3 — `useOptimistic` + Server Actions) and the protocol-mismatch beat (step 5a / slide 13 — WebSocket-as-RSC failure) are not in her piece; those are this talk's contributions.
 
 ---
 
-## Image checklist (capture before stage)
+## Asset checklist (capture before stage)
+
+### Embedded clips (replace all live demos)
+
+- [ ] **`step-1.mov`** (~10–15 s) · cold reload throttled, slow paint, HUD visible · slide 6
+- [ ] **`step-2.mov`** (~10–15 s) · static shell → skeletons → arrived panels (the streaming reveal) · slide 7
+- [ ] **`step-3.mov`** (~10–15 s) · 2–3 Place BUY clicks, pending row appears instantly, HUD shows ~0 ms time-to-trade · slide 8
+- [ ] **`step-4.mov`** (~10 s, optional) · cold reload showing dashboard painting with smaller bundle · slide 11
+- [ ] **`step-13.mov`** (~10 s) · order book stuck on Suspense fallback while rest renders normally · slide 13
+
+Capture method: macOS QuickTime → `File → New Screen Recording` → select Chrome window. Trim with `Cmd+T`. Drop into Canva (Canva supports inline `.mov` playback).
+
+### Static images
 
 - [ ] **Hero screenshot** — dashboard at step-3 with HUD, dark theme · slides 1, 17
-- [ ] **Five-panel grid** — full dashboard with archetype labels overlaid · slide 3
+- [ ] **Clean dashboard screenshot** — full-bleed, no overlays · slide 3
 - [ ] **HUD close-up** — bottom-right corner cropped, magnified · slide 5
-- [ ] **Step-1 dashboard** — HUD showing slow numbers · slide 6
-- [ ] **Mid-stream screenshot** — chart painted, news/trades still skeleton · slide 7
-- [ ] **Optimistic GIF (or 3 frames)** — click → pending → committed · slide 8
 - [ ] **RSC concept timeline diagram** — PHP/Rails → SPA → React 18 SSR → React 19 RSC · slide 9
-- [ ] **Tree diagram + DevTools Coverage** — step-3 vs step-4 chunk drop · slide 11
-- [ ] **Speed-ladder chart or table render** — clean dark-theme version of slide 12 table · slide 12
-- [ ] **Order-book hang screenshot** — Suspense fallback "awaiting first ws message…" with rose border · slide 13
+- [ ] **`coverage-3-vs-4.png`** — DevTools Coverage panel side-by-side (step 3 vs step 4) showing chunks dropped · slide 11 (headline visual)
+- [ ] **Tree diagram** — layout (server) → page (server) → recent-trades (server) → live tail (client) · slide 11 inset
+- [ ] **Speed-ladder table render** — clean dark-theme version of slide 12 table · slide 12
+- [ ] **`step-13-orderbook-hang.png`** — Suspense fallback "awaiting first ws message…" with rose border (clip fallback) · slide 13
 - [ ] **Commit graph** — 5 commits across 3 days, AI-assisted · slide 15
 - [ ] **QR codes** — repo + Purple Technology · slides 16, 17
   - `qrencode -o repo.png 'https://github.com/davidchocholaty/react-rsc'`
@@ -593,16 +623,16 @@ pnpm demo:1:prod # production build for measurements
 
 ---
 
-## Measurement workflow (committed numbers + stage screenshots)
+## Measurement workflow (embedded clips + reference numbers)
 
-Slides 6, 7, 8, 11, and 12 reference values from `docs/talk/measurements/measurements.json`. To populate them:
+The deck no longer commits per-step captured numbers, and there are no live demos on stage. Two sources of evidence carry the talk:
 
-1. Follow `docs/talk/measurements/PROTOCOL.md` end-to-end. Production builds via `pnpm demo:N:prod`. Captures via the DevTools console one-liner `copy(JSON.stringify(__hudStore.getSnapshot(), null, 2))`. 5 runs per step; medians.
-2. Commit the filled `measurements.json` so the slide numbers are versioned alongside the deck.
-3. (Optional) `node docs/talk/measurements/summarize.mjs` to auto-fill `summary` blocks.
-4. When transcribing to Canva, replace each `_stepN.summary.METRIC_` placeholder in the slide bodies with the actual measured number.
+1. **Embedded clips on slides 6, 7, 8, 11, 13.** Each clip shows the HUD updating in real time during a real cold reload (or click sequence) under Slow 4G + 6× CPU throttling. The audience reads the numbers off the HUD overlay in the recording. Capture method per slide is in each slide's "Capture notes" block.
+2. **Reference numbers on slide 12.** Makarevich's published cross-check (developerway.com, Oct 2025) provides the cross-codebase generalization for LCP and warm-reload comparisons.
 
-Stage rehearsal screenshots (separate from committed numbers; for slide visuals): `pnpm demo:N` for each step under throttled DevTools, screenshot the HUD at the right moment. The committed numbers are what the audience reads. The stage HUD is the live confirmation when you switch to the laptop.
+`docs/talk/measurements/PROTOCOL.md`, `measurements.json`, and `summarize.mjs` remain in the repo for anyone who wants to reproduce the numerical protocol independently — but **populating `measurements.json` is not required to ship the talk**. If you do capture during rehearsal, the workflow is: production build via `pnpm demo:N:prod`, DevTools console `copy(JSON.stringify(__hudStore.getSnapshot(), null, 2))`, paste into the matching `runs[]` slot, then `node docs/talk/measurements/summarize.mjs`.
+
+Clip capture (one-shot, ~30 min total at home): `pnpm demo:N:prod` per step under throttled DevTools → QuickTime screen recording → trim → drop into Canva. Per-slide capture notes are inline on slides 6, 7, 8, 11, 13.
 
 ---
 
@@ -615,5 +645,5 @@ These stay honest framings — **say them, don't put them on the slides**. Slide
 3. **Bundle delta in step-4 is small here** — lightweight-charts is the heavy leaf; pattern > kilobytes.
 4. **Step-5 sharp edges (cached CSR vs cold RSC, tick-rate stress) cut for time** — covered as Q&A talking points and the speed-ladder summary row. The WebSocket-as-RSC failure (slide 13) is the only step-5 beat that survived as a dedicated slide because it's the strongest content.
 5. **AI-assisted ≠ AI-written** — agents drafted, but every architectural decision was deliberate, every commit reviewed.
-6. **Speed ladder mixes sources** — your captured numbers + Makarevich cross-check; clarify aloud if asked.
+6. **Speed ladder uses one cross-codebase reference column** (Makarevich) plus the HUD numbers the audience saw move in the embedded clips on steps 1–4 — no pre-captured numbers from this codebase committed in the deck. Clarify aloud if asked.
 7. **WS-as-RSC failure is simulated** — `new Promise<BookSnapshot>(() => {})` — but the lesson is structural; a real WebSocket has the same failure shape because RSC's wire protocol is single-response.
