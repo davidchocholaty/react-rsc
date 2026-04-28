@@ -145,11 +145,10 @@ Paste-ready content for the Canva deck `react_brno` (https://www.canva.com/desig
 **Body:**
 > Every panel `'use client'`. Data fetched in `useEffect`. No Suspense.
 >
-> **Measured (this codebase, throttled Slow 4G + 6× CPU, median of 5):**
-> · LCP: _step1.summary.lcp_ ms
-> · TTFB: _step1.summary.ttfb_ ms
-> · JS shipped: _step1.summary.jsBytes_ kB
-> · Time-to-trade: _step1.summary.timeToTradeMs_ ms (~600 ms expected)
+> **Watch the HUD on stage:**
+> · LCP — slow paint
+> · JS shipped — large bundle
+> · Time-to-trade — ~600 ms (server confirms before UI moves)
 
 **Code (compact):**
 ```tsx
@@ -182,10 +181,10 @@ export function NewsPanel() {
 **Body:**
 > Drop `'use client'` on data-shaped panels. Await server-side. One `<Suspense>` per independent slow read.
 >
-> **Measured (same throttling):**
-> · LCP: _step2.summary.lcp_ ms — **Δ vs step 1: -X%**
-> · Secondary content visible time collapses (skeletons → real content)
-> · JS shipped: _step2.summary.jsBytes_ kB (mostly unchanged — chart still client)
+> **Watch the HUD on stage:**
+> · LCP collapses vs step 1 — static shell paints first
+> · Secondary-content visible time drops (skeletons → real content)
+> · JS shipped barely moves yet — chart canvas is still client
 
 **Code (before / after, compact):**
 ```tsx
@@ -217,10 +216,10 @@ export function NewsPanel() {          export function NewsPanel() {
 > Click → instant feedback. Server confirms in 600 ms. UI doesn't wait.
 > Throw to revert · return to commit.
 >
-> **Measured:**
-> · Time-to-trade: _step3.summary.timeToTradeMs_ ms — **Δ vs step 1: ~600 ms → ~0 ms**
+> **Watch the HUD on stage:**
+> · Time-to-trade: ~600 ms → ~0 ms (the headline number — read it live)
 > · INP improves (click response within microtask boundary)
-> · LCP / JS bytes: roughly unchanged (this step is interaction, not paint)
+> · LCP / JS bytes: roughly unchanged — this step is interaction, not paint
 
 **Code (left — client):**
 ```tsx
@@ -315,10 +314,10 @@ export async function placeTrade(formData: FormData): Promise<PlaceTradeResult> 
 **Body:**
 > Push `'use client'` to the leaves. Server components wrap; tiny islands subscribe.
 >
-> **Measured:**
-> · JS shipped: _step4.summary.jsBytes_ kB — **Δ vs step 3: -X kB**
+> **Watch the HUD + DevTools Coverage on stage:**
+> · JS shipped drops vs step 3 — Coverage panel makes the chunks-removed delta visible
 > · LCP / TTFB roughly unchanged (already optimized in step 2)
-> · Hydration time: _step4.summary.hydrationMs_ ms — only islands hydrate
+> · Hydration time: only islands hydrate, not the whole tree
 
 **Code (server):**
 ```tsx
@@ -363,15 +362,15 @@ export function TradesLiveTail({ initialTrades }) {
 > Summary — what each step actually moved
 
 **Body (table):**
-> | Step | Change | Metric | This codebase ² | Cross-check ¹ |
-> |---|---|---|---|---|
-> | 1 → 2 | Suspense + streaming | Secondary content visible | _step1.lcp → step2.lcp_ | **~4.4 s → ~1.28 s** |
-> | 2 → 3 | `useOptimistic` + Server Action | Time-to-trade | _step2.timeToTradeMs → step3.timeToTradeMs_ | (in-demo metric) |
-> | 3 → 4 | `'use client'` at the leaves | JS shipped | _step3.jsBytes → step4.jsBytes_ | pattern compounds |
-> | warm reload | Cached CSR vs cold RSC | LCP | _step5b.csr.warm.lcp vs step5b.rsc.warm.lcp_ | **~800 ms vs ~750 ms** |
+> | Step | Change | What moves | Reference numbers ¹ |
+> |---|---|---|---|
+> | 1 → 2 | Suspense + streaming | LCP / secondary-content visible | **~4.4 s → ~1.28 s** |
+> | 2 → 3 | `useOptimistic` + Server Action | Time-to-trade | **~600 ms → ~0 ms** (live on stage) |
+> | 3 → 4 | `'use client'` at the leaves | JS shipped (DevTools Coverage delta) | pattern compounds in real apps |
+> | warm reload | Cached CSR vs cold RSC | LCP | **~800 ms vs ~750 ms** |
 >
 > _¹ Nadia Makarevich, developerway.com, Oct 2025 — Slow 4G + 6× CPU._
-> _² This codebase, captured per `docs/talk/measurements/PROTOCOL.md`; medians of 5 runs at matching throttling._
+> _Reproducible via `docs/talk/measurements/PROTOCOL.md`. Live HUD on stage is the second column of evidence — read it during each step's demo._
 
 **Body (lessons):**
 > **Honest takeaways:**
@@ -383,7 +382,7 @@ export function TradesLiveTail({ initialTrades }) {
 **Visual:** stacked horizontal bar chart per metric, one bar per step. Color rows: emerald = improvement, rose = regression. Or just the table on a clean dark background.
 
 **Presenter notes:**
-> The slide audience photographs. Two columns of evidence: this codebase's own captured numbers and Makarevich's published cross-check. Honest takeaways in the bottom block. Next slide is the load-bearing "do not do this" beat — keep momentum.
+> The slide audience photographs. One column of reference numbers (Makarevich's published cross-check) plus the live HUD they already saw move during steps 1–4. Honest takeaways in the bottom block. Next slide is the load-bearing "do not do this" beat — keep momentum.
 
 ---
 
@@ -595,16 +594,16 @@ pnpm demo:1:prod # production build for measurements
 
 ---
 
-## Measurement workflow (committed numbers + stage screenshots)
+## Measurement workflow (live HUD on stage + reference numbers)
 
-Slides 6, 7, 8, 11, and 12 reference values from `docs/talk/measurements/measurements.json`. To populate them:
+The deck no longer commits per-step captured numbers. Two sources of evidence carry the talk:
 
-1. Follow `docs/talk/measurements/PROTOCOL.md` end-to-end. Production builds via `pnpm demo:N:prod`. Captures via the DevTools console one-liner `copy(JSON.stringify(__hudStore.getSnapshot(), null, 2))`. 5 runs per step; medians.
-2. Commit the filled `measurements.json` so the slide numbers are versioned alongside the deck.
-3. (Optional) `node docs/talk/measurements/summarize.mjs` to auto-fill `summary` blocks.
-4. When transcribing to Canva, replace each `_stepN.summary.METRIC_` placeholder in the slide bodies with the actual measured number.
+1. **Live HUD on stage.** Each step's demo (`pnpm demo:N`) shows the HUD updating in real time. Read the relevant rows aloud during the demo — that's the primary, audience-facing evidence.
+2. **Reference numbers on slide 12.** Makarevich's published cross-check (developerway.com, Oct 2025) provides the cross-codebase generalization for LCP and warm-reload comparisons.
 
-Stage rehearsal screenshots (separate from committed numbers; for slide visuals): `pnpm demo:N` for each step under throttled DevTools, screenshot the HUD at the right moment. The committed numbers are what the audience reads. The stage HUD is the live confirmation when you switch to the laptop.
+`docs/talk/measurements/PROTOCOL.md` and `measurements.json` remain in the repo for anyone who wants to reproduce the protocol independently — but **populating `measurements.json` is no longer required to ship the talk**. If you do capture during rehearsal, the workflow is unchanged: production build via `pnpm demo:N:prod`, DevTools console `copy(JSON.stringify(__hudStore.getSnapshot(), null, 2))`, paste into the matching `runs[]` slot.
+
+Stage rehearsal screenshots (for slide visuals only — *not* for committed numbers): `pnpm demo:N` for each step under throttled DevTools, screenshot the HUD at the right moment.
 
 ---
 
@@ -617,5 +616,5 @@ These stay honest framings — **say them, don't put them on the slides**. Slide
 3. **Bundle delta in step-4 is small here** — lightweight-charts is the heavy leaf; pattern > kilobytes.
 4. **Step-5 sharp edges (cached CSR vs cold RSC, tick-rate stress) cut for time** — covered as Q&A talking points and the speed-ladder summary row. The WebSocket-as-RSC failure (slide 13) is the only step-5 beat that survived as a dedicated slide because it's the strongest content.
 5. **AI-assisted ≠ AI-written** — agents drafted, but every architectural decision was deliberate, every commit reviewed.
-6. **Speed ladder mixes sources** — your captured numbers + Makarevich cross-check; clarify aloud if asked.
+6. **Speed ladder uses one cross-codebase reference column** (Makarevich) plus the live HUD they already saw move during steps 1–4 — no pre-captured numbers from this codebase committed in the deck. Clarify aloud if asked.
 7. **WS-as-RSC failure is simulated** — `new Promise<BookSnapshot>(() => {})` — but the lesson is structural; a real WebSocket has the same failure shape because RSC's wire protocol is single-response.
