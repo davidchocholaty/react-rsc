@@ -117,24 +117,19 @@ tady ukazu demo appku, kterou budu pouzivat behem prezentace. Popisu jednotlive 
 > Metrics · what we measure, and why
 
 **Body:**
-> **Web Vitals** (Next.js `useReportWebVitals`):
-> · **LCP** — Largest Contentful Paint (does the page feel painted?)
-> · **TTFB** — Time To First Byte (server responsiveness)
-> · **FCP** — First Contentful Paint (something visible)
-> · **INP** — Interaction to Next Paint (does click→visible feel snappy?)
-> · **CLS** — Cumulative Layout Shift (no jumping)
+> Four metrics on the HUD — one per slide where they earn their keep:
 >
-> **Custom marks** (`performance.measure`):
-> · **JS bytes shipped** (sum of `.js` transferSize)
-> · **Hydration time** (root + chart island)
-> · **Time-to-trade** (Place BUY click → optimistic commit)
+> · **LCP** — Largest Contentful Paint · does the page feel painted? *(slides 6 → 7)*
+> · **INP** — Interaction to Next Paint · does click → visible feel snappy? *(slide 8)*
+> · **JS** — JS bytes shipped · how heavy is the bundle? *(slides 6, 11)*
+> · **TRADE** — Place BUY click → optimistic commit · the headline interaction number *(slide 8)*
 >
-> Live HUD in the corner: `NEXT_PUBLIC_HUD=1` · reads via `useSyncExternalStore` from a singleton store.
+> Live HUD bottom-right of the dashboard, gated by `NEXT_PUBLIC_HUD=1`.
 
-**Visual:** 2×4 grid of metric cards, each metric paired with the question it answers ("does the page feel painted?", etc.).
+**Visual:** 2×2 grid of metric cards. Each card: the four-letter HUD label (LCP / INP / JS / TRADE) + the question it answers + which step's clip makes it move. Match the HUD's accent colors so the audience builds the link before they see the clips.
 
 **Presenter notes:**
-> Web Vitals are the standard browser-level numbers. Custom marks fill the gaps — bundle size and the user-feels metrics like time-to-trade. The HUD is gated behind an env var so production builds don't pay for it. When I say a number moves, the HUD is telling you. We'll see five sets of these numbers, one per step.
+> Four metrics, one per lesson. LCP for the streaming win. INP for "does the click feel fast." JS bytes for the RSC-at-leaves bundle drop. TRADE for the optimistic-UI headline. The HUD overlay shows these four live in every embedded clip — when I say a number moves, the HUD in the clip is telling you. Aside: standard Web Vitals also include TTFB / FCP / CLS, but those don't change meaningfully across these steps so they'd just be noise on screen — the store still tracks them for anyone reproducing the numerical protocol.
 
 ---
 
