@@ -92,7 +92,7 @@ if (data.step5c?.tabs) {
 	if (summary !== null) updated.push(`step5c (${data.step5c.tabs.length} tabs)`)
 }
 
-writeFileSync(FILE, `${JSON.stringify(data, null, 2)}\n`)
+writeFileSync(FILE, `${JSON.stringify(data, null, '\t')}\n`)
 console.log(
 	updated.length === 0
 		? 'Summary blocks updated: (none — all runs[] empty)'
