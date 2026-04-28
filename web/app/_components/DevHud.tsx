@@ -54,7 +54,7 @@ function DevHudOverlay() {
 	return (
 		<aside
 			aria-label="Performance HUD"
-			className="pointer-events-none fixed right-3 bottom-3 z-50 rounded-md border border-zinc-800 bg-black/80 p-3 font-mono text-[11px] text-zinc-200 backdrop-blur"
+			className="pointer-events-none fixed right-3 bottom-3 z-50 flex flex-col gap-1 rounded-md border border-zinc-800 bg-black/80 p-4 font-mono text-base text-zinc-200 backdrop-blur"
 		>
 			<HudRow label="LCP" value={formatMs(snap.lcp)} />
 			<HudRow label="INP" value={formatMs(snap.inp)} />
@@ -71,9 +71,11 @@ interface HudRowProps {
 
 function HudRow({ label, value }: HudRowProps) {
 	return (
-		<div className="flex items-baseline gap-3 tabular-nums">
-			<span className="w-12 text-zinc-500">{label}</span>
-			<span className="text-zinc-100">{value}</span>
+		<div className="flex items-baseline gap-4 tabular-nums">
+			<span className="w-20 text-sm text-zinc-500 uppercase tracking-wider">
+				{label}
+			</span>
+			<span className="text-2xl font-bold text-zinc-100">{value}</span>
 		</div>
 	)
 }
