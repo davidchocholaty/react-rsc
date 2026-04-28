@@ -569,6 +569,8 @@ pnpm demo:1:prod # production build for measurements
 > **Q: When NOT to use RSC?** A: Real-time visualizations / chat / collab / games / any high-frequency push → stay SPA + selective islands. Slide 13 covered the WebSocket failure mode; tick-rate stress is the same shape (high-frequency push isn't RSC's natural form).
 > **Q: Did you really build this in 3 days?** A: Yes — with an AI pair. The codebase is open; clone and reproduce.
 > **Q: How does this perform on warm reloads vs a well-cached SPA?** A: Without `revalidateTag`, CSR cached can match or beat RSC. Makarevich measured 800 ms CSR vs 750 ms RSC + Suspense; that gap inverts without server caching.
+> **Q: Are these techniques current in 2026?** A: Yes — every step is a recommended pattern from either the React core team or the Next.js team. RSC stable since React 19 (Dec 2024). `useOptimistic` and Server Actions stable in React 19. `'use client'` at the leaves is the canonical core-team recommendation. Nothing fundamental has shifted in the 6 months since Makarevich's article — adoption has just continued to grow (TanStack Start GA, Waku stable, Parcel-RSC).
+> **Q: Is this just rehashing Makarevich's article?** A: No. I cite her for the cross-codebase numbers on slide 12 because she ran the same Slow 4G + 6× CPU protocol — that's a credibility cross-check, not a copy. The React 19 interaction layer (step 3 — `useOptimistic` + Server Actions) and the protocol-mismatch beat (step 5a / slide 13 — WebSocket-as-RSC failure) are not in her piece; those are this talk's contributions.
 
 ---
 
