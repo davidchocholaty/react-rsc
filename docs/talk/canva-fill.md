@@ -41,18 +41,16 @@ Paste-ready content for the Canva deck `react_brno` (https://www.canva.com/desig
 **Title:**
 > Customers want the app to feel fast
 
-**Body:**
-> The app must **feel** fast — even on mobile, even on slow networks, even on tired hardware.
->
-> Every 100 ms of latency = −1% conversion (Amazon).
-> In trading, latency is **money** — lost fills, stale prices, abandoned orders.
->
-> **AI doesn't change this.** Even with coding agents, the **architectural decisions** — which tool, which boundary, which trade-off — are still ours. AI accelerates implementation; it doesn't choose the shape of the system.
+**Body (bullets):**
+> - Modern apps need to **feel fast** — on mobile, on slow networks, on tired hardware
+> - Performance is a **product feature**, not a polish step — speed is part of what users buy
+> - React 19 brought a new toolbox: **RSC, streaming, Server Actions, optimistic UI** — each fits a different problem, and choosing wrong costs more than choosing none
+> - AI accelerates implementation, but the **architectural decision is still ours** — and that's what this talk is about
 
-**Visual:** simple split layout. Left: stat callouts (mobile / slow network / 100 ms = −1%). Right: small icon of architect's drafting compass, captioned "still our job".
+**Visual:** clean 4-bullet layout on dark background. Optional small icon row at the bottom showing the four tools (RSC · streaming · Server Actions · optimistic) in muted accent colors.
 
 **Presenter notes:**
-> Performance is product, not polish. We aren't optimizing for benchmarks — we're optimizing for the user clicking Place BUY before the price moves. AI agents help us iterate faster on these choices, but they don't make the choices. That's why a talk about RSC vs streaming vs optimistic still matters in 2026 — it's our job to know which one fits.
+> Performance is product, not polish. The point of this talk isn't a benchmark contest — it's that React 19 gave us several new tools that each solve a different shape of problem, and picking the right one still requires judgment. AI lets us try architectural ideas in hours instead of sprints, but it doesn't make the architectural choice for us. That's why a talk about RSC vs streaming vs optimistic still matters in 2026 — it's our job to know which lever fits which problem. The next slides walk through the demo, the metrics, and five concrete steps of that decision in action.
 
 ---
 
@@ -63,21 +61,25 @@ Paste-ready content for the Canva deck `react_brno` (https://www.canva.com/desig
 **Title:**
 > Demo app — a fintech trading dashboard
 
-**Body:**
-> Five panels chosen to cover four architectural archetypes:
->
-> **Price chart** → client island (canvas, lightweight-charts) · cyan
-> **Order book** → client + ws-style subscription · cyan
-> **Order ticket** → optimistic + Server Action · emerald
-> **News / research** → server-fetched read · violet
-> **Recent trades** → streamed (Suspense) + tiny client tail · violet
->
-> Symbol is decorative; data layer is symbol-agnostic. Each panel maps to one archetype on purpose, so when the architecture changes, you see exactly which panel changed.
+**Body:** _(none — screenshot speaks for itself; talk over it)_
 
-**Visual:** 2×3 grid screenshot of the dashboard with each panel labeled by archetype.
+**Visual:** full-bleed screenshot of the dashboard at `step-3-optimistic-ui` (or `step-4-rsc`) on a dark background. No labels, no overlays, no annotations — just the app. Footer + slide number stay.
 
 **Presenter notes:**
-> A toy trading dashboard. Aesthetically plausible fintech without claiming domain accuracy. Even if your day job is a slower-cadence client zone (like ours at Purple), there are always parts of the product where speed matters — login, dashboards, orders, anything the user is waiting for. This dashboard is dense enough to demonstrate every pattern we'll discuss.
+> _Three beats — what it contains, why those specific panels, why this is the right shape for the talk._
+>
+> **What it contains.** Five panels: price chart, order book, order ticket (BUY / SELL), news / research, recent trades. A toy trading dashboard — aesthetically plausible fintech, no claim of domain accuracy. Symbol is decorative, data layer is mocked.
+>
+> **Why those specific panels.** Each panel maps to a different architectural pattern, on purpose:
+> · price chart → heavy client island (canvas / lightweight-charts)
+> · order book → real-time push (WebSocket-shaped subscription)
+> · order ticket → mutation that needs optimistic feedback + Server Action
+> · news / research → static server-fetched read
+> · recent trades → streamed initial render + tiny client tail
+>
+> Five panels, four architectural shapes. So when we change the architecture across the five steps, you can see *exactly* which panel moved — the demo isolates the lesson.
+>
+> **Why this is useful for our purpose.** Fintech is a fair excuse for "every millisecond matters" without overclaiming. Even if your day job is a slower-cadence app (like ours at Purple), there are always parts of the product where speed matters — login, dashboards, mutations, anything the user is waiting for. This dashboard is dense enough to demonstrate every pattern we'll discuss but small enough to fit on one screen and one slot.
 
 ---
 
