@@ -74,9 +74,6 @@ mise run check                              # lint:fix + typecheck + test in par
 
 ```
 react-rsc/
-├── docs/
-│   ├── brainstorms/                 # talk research + requirements
-│   └── plans/                       # this demo's executable plan
 ├── packages/                        # shared workspace packages (kept from Purple Stack)
 ├── scripts/
 │   ├── aws_sso.sh                   # SST helper (only useful when deploying)
@@ -104,9 +101,6 @@ react-rsc/
 
 ## References
 
-- Plan: [docs/plans/2026-04-27-001-feat-rsc-trading-dashboard-demo-plan.md](docs/plans/2026-04-27-001-feat-rsc-trading-dashboard-demo-plan.md)
-- Origin brainstorm: [docs/brainstorms/rsc-trading-dashboard-demo-requirements.md](docs/brainstorms/rsc-trading-dashboard-demo-requirements.md)
-- Research digest: [docs/brainstorms/rsc-research-digest.md](docs/brainstorms/rsc-research-digest.md)
 - [Next.js Server and Client Components](https://nextjs.org/docs/app/getting-started/server-and-client-components)
 - [Next.js streaming guide](https://nextjs.org/docs/app/guides/streaming)
 - [React `useOptimistic`](https://react.dev/reference/react/useOptimistic)

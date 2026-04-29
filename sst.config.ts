@@ -23,8 +23,6 @@ export default $config({
 		})
 
 		// The demo runs locally; deploy is opt-in for the post-talk public URL.
-		// See plan: R20 (deferred), and SST/OpenNext caveats called out in
-		// docs/plans/2026-04-27-001-feat-rsc-trading-dashboard-demo-plan.md.
 		const web = new sst.aws.Nextjs('Web', {
 			path: 'web'
 		})
