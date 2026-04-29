@@ -4,6 +4,10 @@ A demo for the React Brno talk **"Streaming the Future: Building High-Performanc
 
 The app renders five panels mapped to four architectural archetypes — client island (price chart), client + WebSocket-style (order book), optimistic UI (order ticket), RSC server-fetch (news), and RSC streamed via Suspense (recent trades). An always-visible HUD overlay reports live performance metrics (LCP, TTFB, JS bytes shipped, hydration time, time-to-trade) so the audience can see the numbers move at every progression step.
 
+## Presentation
+
+The slide deck is checked into the repo at [`docs/react_brno.pdf`](docs/react_brno.pdf).
+
 ## Tags
 
 | Tag | Architectural step | What changes | Hero metric |
@@ -76,7 +80,8 @@ mise run check                              # lint:fix + typecheck + test in par
 react-rsc/
 ├── docs/
 │   ├── brainstorms/                 # talk research + requirements
-│   └── plans/                       # this demo's executable plan
+│   ├── plans/                       # this demo's executable plan
+│   └── react_brno.pdf               # talk slide deck
 ├── packages/                        # shared workspace packages (kept from Purple Stack)
 ├── scripts/
 │   ├── aws_sso.sh                   # SST helper (only useful when deploying)
